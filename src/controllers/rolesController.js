@@ -1,59 +1,31 @@
-const { getAllRoles, getRoleById } = require('../models/roles');
+const { query } = require('../db');
 
-module.exports = {
-  // Function to create a new role
-  async createRole(req, res) {
-    try {
-      const role = await Role.create(req.body);
-      res.status(201).json(role);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  },
 
-  // Function to get all roles
-  async getRoles(req, res) {
-    try {
-      const roles = await getAllRoles();
-      res.status(200).json(roles);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  },
-
-  // Function to update a role
-  async updateRole(req, res) {
-    try {
-      const role = await getRoleById(req.params.id);
-
-      if (!role) {
-        return res.status(404).json({ message: 'Role not found' });
-      }
-
-      // Update the role
-      // ...
-
-      res.status(200).json(role);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  },
-
-  // Function to delete a role
-  async deleteRole(req, res) {
-    try {
-      const role = await getRoleById(req.params.id);
-
-      if (!role) {
-        return res.status(404).json({ message: 'Role not found' });
-      }
-
-      // Delete the role
-      // ...
-
-      res.status(204).send();
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
+const getRoles = async (req, res) => {
+  try {
+    const result = await query('SELECT * FROM roles');
+    res.status(200).json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+const createRole = async (req, res) => {
+  const { name } = req.body;
+  try {
+    const roleResult = await query(
+      'INSERT INTO roles (name) VALUES ($1) RETURNING *',
+      [name]
+    );
+    const role = roleResult.rows[0];
+    res.status(201).json({ ...role });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+
+module.exports = { getRoles, createRole };

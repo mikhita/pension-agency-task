@@ -24,7 +24,7 @@ const assignRoleToUser = async (req, res) => {
     const role = roleResult.rows[0];
 
     // Update the user's role id with the retrieved role id
-    await pool.query(
+    await query(
       'UPDATE users SET role_id = $1 WHERE id = $2',
       [role.id, user_id]
     );
@@ -73,11 +73,11 @@ const getUserById = async (req, res) => {
 
 const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { name, email, age } = req.body;
+  const { name, email, age, role_id } = req.body;
   try {
     const result = await query(
-      'UPDATE users SET name = $1, email = $2, age = $3 WHERE id = $4 RETURNING *',
-      [name, email, age, id]
+      'UPDATE users SET name = $1, email = $2, age = $3, role_id = $4 WHERE id = $5 RETURNING *',
+      [name, email, age, role_id, id]
     );
     if (result.rows.length === 0) {
       res.status(404).json({ message: 'User not found' });
