@@ -1,4 +1,6 @@
 const { pool } = require('../db');
+const { query } = require('../db');
+
 
 const getUsers = async (req, res) => {
   try {
@@ -11,32 +13,23 @@ const getUsers = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-  const { name, email, password, role_id } = req.body;
+  const { name, email, age, role_id } = req.body;
   try {
-    const userResult = await pool.query(
-      'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *',
-      [name, email, password]
+    const userResult = await query(
+      'INSERT INTO users (name, email, age, role_id) VALUES ($1, $2, $3, $4) RETURNING *',
+      [name, email, age, role_id]
     );
     const user = userResult.rows[0];
-    const roleIdResult = await pool.query(
-      'SELECT * FROM roles WHERE id = $1',
-      [role_id]
-    );
-    if (roleIdResult.rowCount === 0) {
-      res.status(404).json({ message: 'Role not found' });
-      return;
-    }
-    const role = roleIdResult.rows[0];
-    await pool.query(
-      'INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)',
-      [user.id, role.id]
-    );
-    res.status(201).json({ ...user, role });
+    res.status(201).json({ ...user });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+
+
+
 
 
 const getUserById = async (req, res) => {
@@ -56,11 +49,11 @@ const getUserById = async (req, res) => {
 
 const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { name, email, password } = req.body;
+  const { name, email, age } = req.body;
   try {
     const result = await pool.query(
-      'UPDATE users SET name = $1, email = $2, password = $3 WHERE id = $4 RETURNING *',
-      [name, email, password, id]
+      'UPDATE users SET name = $1, email = $2, age = $3 WHERE id = $4 RETURNING *',
+      [name, email, age, id]
     );
     if (result.rows.length === 0) {
       res.status(404).json({ message: 'User not found' });
