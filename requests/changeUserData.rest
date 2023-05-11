@@ -1,0 +1,9 @@
+PUT http://localhost:3000/users/2
+Content-Type: application/json
+
+{
+  "name": "Mikheil Ispiriani",
+  "email": "john@example.com",
+  "age": "35"
+}
+

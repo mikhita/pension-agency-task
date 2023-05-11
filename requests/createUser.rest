@@ -1,9 +1,9 @@
-POST http://localhost:3000/api/users
+POST http://localhost:3000/users
 Content-Type: application/json
 
 {
-  "name": "Mikheil Ispiriani",
-  "email": "mikheil@example.com",
-  "age": "25",
-  "role_id": 1
+  "name": "Mikhei Ispiriani",
+  "email": "mikheilispiriani@yahoo.com",
+  "age": 27,
+  "role": "Footballer"
 }
