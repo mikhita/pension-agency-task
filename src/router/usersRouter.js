@@ -14,7 +14,5 @@ router.post('/users', usersController.createUser);
 // Update an existing user
 router.put('/users/:id', usersController.updateUser);
 
-// Change a user's role
-router.put('/users/:id/role', usersController.updateUserRole);
 
 module.exports = router;

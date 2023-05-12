@@ -1,4 +1,5 @@
 const { Pool } = require('pg');
+const { query } = require('pg');
 require('dotenv').config()
 
 
@@ -23,6 +24,8 @@ module.exports = {
 
 
   async getUserById(userId) {
+    
+    console.log('getUserById query:', query, [userId]);
     const { rows: users } = await pool.query(`
       SELECT u.name, u.email, u.age, r.name AS role
       FROM users u
@@ -89,30 +92,5 @@ module.exports = {
       client.release();
     }
   },
-
-  async getRoleIdByName(name) {
-    if (!name) {
-      throw new Error('Role name is not defined');
-    }
-  
-    const { rows: roles } = await pool.query(
-      'SELECT id FROM roles WHERE name = $1',
-      [name]
-    );
-  
-    if (!roles || !roles[0]) {
-      throw new Error(`Role with name ${name} not found`);
-    }
-  
-    return roles[0].id;
-  },
-  
-  
-
-  async updateUserRole(userId, roleId) {
-    await pool.query('UPDATE user_roles SET role_id = $1 WHERE user_id = $2', [roleId, userId]);
-  },
-  
-  
   
 };

@@ -1,0 +1,1 @@
+- I delete user with id 1, so all the users are active instead of the user/1 endpoint, but it is okay, because I am getting user by there name or other property and what will be the id is not matter
