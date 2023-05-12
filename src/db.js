@@ -59,6 +59,23 @@ module.exports = {
     }
   },
 
+  async getRoleIdByName(name) {
+    const query = {
+      text: 'SELECT id FROM roles WHERE name = $1',
+      values: [name],
+    };
+    try {
+      const result = await pool.query(query);
+      if (result.rows.length === 0) {
+        return null;
+      }
+      return result.rows[0].id;
+    } catch (err) {
+      console.error('Error getting role ID by name:', err.stack);
+      throw err;
+    }
+  },
+
   async assignUserRole(userId, roleId) {
     const client = await pool.connect();
     try {
