@@ -26,9 +26,28 @@ exports.getUser = async (req, res) => {
 exports.createUser = async (req, res) => {
   const { name, email, age, role } = req.body;
 
+  const client = await pool.connect();
+
   try {
+    // Start a transaction
+    await client.query('BEGIN');
+
+    // Check if a user with the same data already exists
+    const { rows: existingUsers } = await client.query(
+      'SELECT * FROM users WHERE name = $1 AND email = $2 AND age = $3',
+      [name, email, age]
+    );
+
+    if (existingUsers.length > 0) {
+      throw new Error('User already exists');
+    }
+
     // Create the user and retrieve the new ID
-    const userId = await db.createUser(name, email, age);
+    const { rows: user } = await client.query(
+      'INSERT INTO users (name, email, age) VALUES ($1, $2, $3) RETURNING id',
+      [name, email, age]
+    );
+    const userId = user[0].id;
 
     // Get the ID of the specified role
     const roleId = await db.getRoleIdByName(role);
@@ -36,12 +55,21 @@ exports.createUser = async (req, res) => {
     // Assign the role to the user
     await db.assignUserRole(userId, roleId);
 
+    // Commit the transaction
+    await client.query('COMMIT');
+
     res.status(201).json({ message: 'User created successfully' });
   } catch (err) {
+    // Roll back the transaction
+    await client.query('ROLLBACK');
+
     console.error(err);
     res.status(500).json({ message: 'Failed to create user' });
+  } finally {
+    client.release();
   }
 };
+
 
 exports.updateUser = async (req, res) => {
   const userId = req.params.id;

@@ -25,7 +25,7 @@ module.exports = {
 
   async getUserById(userId) {
     
-    console.log('getUserById query:', query, [userId]);
+    console.log('getUserById query:', [userId]);
     const { rows: users } = await pool.query(`
       SELECT u.name, u.email, u.age, r.name AS role
       FROM users u
@@ -45,12 +45,25 @@ module.exports = {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
-      const { rows: user } = await client.query(
+  
+      // Check if a user with the same email already exists
+      const { rows: existingUsers } = await client.query(
+        'SELECT * FROM users WHERE email = $1',
+        [email]
+      );
+      if (existingUsers.length > 0) {
+        await client.query('ROLLBACK');
+        throw new Error('A user with the same email already exists');
+      }
+  
+      // Insert the new user into the users table
+      const { rows: newUser } = await client.query(
         'INSERT INTO users (name, email, age) VALUES ($1, $2, $3) RETURNING id',
         [name, email, age]
       );
+  
       await client.query('COMMIT');
-      return user[0].id;
+      return newUser[0].id;
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;
@@ -58,6 +71,7 @@ module.exports = {
       client.release();
     }
   },
+  
 
   async getRoleIdByName(name) {
     const query = {
