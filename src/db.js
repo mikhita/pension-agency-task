@@ -91,6 +91,7 @@ module.exports = {
       throw err;
     }
   },
+  
 
   async assignUserRole(userId, roleId) {
     const client = await pool.connect();
@@ -125,5 +126,41 @@ module.exports = {
       client.release();
     }
   },
+  async updateUserRole(userId, newRoleName) {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+  
+      // Check if the new role name exists in the roles table
+      const { rows: existingRoles } = await client.query(
+        'SELECT * FROM roles WHERE name = $1',
+        [newRoleName]
+      );
+  
+      if (existingRoles.length === 0) {
+        await client.query('ROLLBACK');
+        throw new Error('New role not found');
+      }
+  
+      const roleId = existingRoles[0].id;
+  
+      // Update the user's role in the user_roles table
+      await client.query(
+        'UPDATE user_roles SET role_id = $1 WHERE user_id = $2',
+        [roleId, userId]
+      );
+  
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+  
+  
+  
+  
   
 };

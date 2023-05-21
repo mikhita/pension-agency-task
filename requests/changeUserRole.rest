@@ -1,8 +1,6 @@
-PUT http://localhost:3000/users/1/role
-
+PUT http://localhost:3000/1/role
 Content-Type: application/json
 
 {
-    "role": "Programmer"
+  "newRoleName": "Dantist"
 }
-

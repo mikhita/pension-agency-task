@@ -103,6 +103,20 @@ exports.updateUser = async (req, res) => {
   }
 };
 
+exports.updateUserRole = async (req, res) => {
+  const { userId } = req.params;
+  const { newRoleName } = req.body;
+
+  try {
+    await db.updateUserRole(userId, newRoleName);
+
+    res.status(200).json({ message: 'User role updated successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to update user role' });
+  }
+};
+
 
 
 
