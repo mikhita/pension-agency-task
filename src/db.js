@@ -79,6 +79,8 @@ module.exports = {
       values: [name],
     };
     try {
+      console.log('Role name:', name);
+      console.log('SQL query:', query);
       const result = await pool.query(query);
       if (result.rows.length === 0) {
         return null;

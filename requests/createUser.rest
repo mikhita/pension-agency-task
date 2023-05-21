@@ -2,8 +2,8 @@ POST http://localhost:3000/users
 Content-Type: application/json
 
 {
-  "name": "Suxo",
-  "email": "suxo@yahoo.com",
-  "age": 22,
-  "role": "Footballer"
+  "name": "Gurama",
+  "email": "gurama@yahoo.com",
+  "age": 41,
+  "role": "Doctor"
 }

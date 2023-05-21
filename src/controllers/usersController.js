@@ -1,4 +1,14 @@
 const db = require('../db');
+const { Pool } = require('pg');
+
+
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'pension_agency',
+  password: `${process.env.PASSWORD}`,
+  port: 5432,
+});
 
 exports.getUsers = async (req, res) => {
   try {
@@ -42,12 +52,18 @@ exports.createUser = async (req, res) => {
       throw new Error('User already exists');
     }
 
-    // Create the user and retrieve the new ID
+    // Create the user
     const { rows: user } = await client.query(
       'INSERT INTO users (name, email, age) VALUES ($1, $2, $3) RETURNING id',
       [name, email, age]
     );
     const userId = user[0].id;
+
+    // Commit the user creation
+    await client.query('COMMIT');
+
+    // Start a new transaction
+    await client.query('BEGIN');
 
     // Get the ID of the specified role
     const roleId = await db.getRoleIdByName(role);
@@ -55,7 +71,7 @@ exports.createUser = async (req, res) => {
     // Assign the role to the user
     await db.assignUserRole(userId, roleId);
 
-    // Commit the transaction
+    // Commit the role assignment
     await client.query('COMMIT');
 
     res.status(201).json({ message: 'User created successfully' });
@@ -69,6 +85,7 @@ exports.createUser = async (req, res) => {
     client.release();
   }
 };
+
 
 
 exports.updateUser = async (req, res) => {
