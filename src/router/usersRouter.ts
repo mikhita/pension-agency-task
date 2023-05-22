@@ -1,12 +1,11 @@
-const express = require('express');
-const usersController = require('../controllers/usersController');
+import express from 'express';
+import * as usersController from '../controllers/usersController';
 
 const router = express.Router();
 
 router.get('/', usersController.getUsers);
 
 router.get('/users/:id', usersController.getUser);
-
 
 // Create a new user
 router.post('/users', usersController.createUser);
@@ -16,7 +15,6 @@ router.put('/users/:id', usersController.updateUser);
 
 router.put('/:userId/role', usersController.updateUserRole);
 
-router.get('/users/role/:roleName', usersController.getUserByRole);
+router.get('/users/role/:roleName', usersController.getUsersByRole);
 
-
-module.exports = router;
+export default router;

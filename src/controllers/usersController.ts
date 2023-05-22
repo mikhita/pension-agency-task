@@ -1,16 +1,16 @@
-const db = require('../db');
-const { Pool } = require('pg');
-
+import { Request, Response } from 'express';
+import db from '../db';
+import { Pool, QueryResult } from 'pg';
 
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
   database: 'pension_agency',
-  password: `${process.env.PASSWORD}`,
+  password: process.env.PASSWORD,
   port: 5432,
 });
 
-exports.getUsers = async (req, res) => {
+export const getUsers = async (req: Request, res: Response): Promise<void> => {
   try {
     const users = await db.getAllUsers();
     res.status(200).json(users);
@@ -20,11 +20,11 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-exports.getUser = async (req, res) => {
+export const getUser = async (req: Request, res: Response): Promise<void> => {
   const userId = req.params.id;
 
   try {
-    const user = await db.getUserById(userId);
+    const user = await db.getUserById(Number(userId));
     res.status(200).json(user);
   } catch (err) {
     console.error(err);
@@ -32,8 +32,7 @@ exports.getUser = async (req, res) => {
   }
 };
 
-
-exports.createUser = async (req, res) => {
+export const createUser = async (req: Request, res: Response): Promise<void> => {
   const { name, email, age, role } = req.body;
 
   const client = await pool.connect();
@@ -53,7 +52,7 @@ exports.createUser = async (req, res) => {
     }
 
     // Create the user
-    const { rows: user } = await client.query(
+    const { rows: user } = await client.query<{ id: number }>(
       'INSERT INTO users (name, email, age) VALUES ($1, $2, $3) RETURNING id',
       [name, email, age]
     );
@@ -67,6 +66,10 @@ exports.createUser = async (req, res) => {
 
     // Get the ID of the specified role
     const roleId = await db.getRoleIdByName(role);
+
+    if (roleId === null) {
+      throw new Error('Role not found');
+    }
 
     // Assign the role to the user
     await db.assignUserRole(userId, roleId);
@@ -86,15 +89,13 @@ exports.createUser = async (req, res) => {
   }
 };
 
-
-
-exports.updateUser = async (req, res) => {
+export const updateUser = async (req: Request, res: Response): Promise<void> => {
   const userId = req.params.id;
   const { name, email, age } = req.body;
 
   try {
     // Update the user's details
-    await db.updateUser(userId, name, email, age);
+    await db.updateUser(Number(userId), name, email, age);
 
     res.status(200).json({ message: 'User updated successfully' });
   } catch (err) {
@@ -103,12 +104,12 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-exports.updateUserRole = async (req, res) => {
+export const updateUserRole = async (req: Request, res: Response): Promise<void> => {
   const { userId } = req.params;
   const { newRoleName } = req.body;
 
   try {
-    await db.updateUserRole(userId, newRoleName);
+    await db.updateUserRole(Number(userId), newRoleName);
 
     res.status(200).json({ message: 'User role updated successfully' });
   } catch (err) {
@@ -116,7 +117,8 @@ exports.updateUserRole = async (req, res) => {
     res.status(500).json({ message: 'Failed to update user role' });
   }
 };
-exports.getUserByRole = async (req, res) => {
+
+export const getUsersByRole = async (req: Request, res: Response): Promise<void> => {
   const { roleName } = req.params;
 
   try {
@@ -127,10 +129,3 @@ exports.getUserByRole = async (req, res) => {
     res.status(500).json({ message: 'Failed to get users by role' });
   }
 };
-
-
-
-
-
-
-
