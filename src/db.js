@@ -157,10 +157,22 @@ module.exports = {
     } finally {
       client.release();
     }
-  }
-  
-  
-  
-  
+  },
+  async getUsersByRole(roleName) {
+    const client = await pool.connect();
+    try {
+      const query = `
+        SELECT u.*
+        FROM users u
+        INNER JOIN user_roles ur ON u.id = ur.user_id
+        INNER JOIN roles r ON ur.role_id = r.id
+        WHERE r.name = $1
+      `;
+      const result = await client.query(query, [roleName]);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  },
   
 };

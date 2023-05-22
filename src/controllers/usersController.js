@@ -116,6 +116,19 @@ exports.updateUserRole = async (req, res) => {
     res.status(500).json({ message: 'Failed to update user role' });
   }
 };
+exports.getUserByRole = async (req, res) => {
+  const { roleName } = req.params;
+
+  try {
+    const users = await db.getUsersByRole(roleName);
+    res.status(200).json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to get users by role' });
+  }
+};
+
+
 
 
 

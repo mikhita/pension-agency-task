@@ -16,4 +16,7 @@ router.put('/users/:id', usersController.updateUser);
 
 router.put('/:userId/role', usersController.updateUserRole);
 
+router.get('/users/role/:roleName', usersController.getUserByRole);
+
+
 module.exports = router;
